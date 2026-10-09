@@ -1,0 +1,6 @@
+{
+  "name": "Chronos Stopwatch",
+  "description": "Precision stopwatch and lap timer with chronograph dials, split analytics, interval workouts, and session history.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
