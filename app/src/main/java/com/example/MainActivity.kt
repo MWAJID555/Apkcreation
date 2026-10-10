@@ -1,341 +1,218 @@
 package com.example
 
 import android.os.Bundle
-import android.view.WindowManager
+import android.os.Environment
+import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FitnessCenter
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Timer
-import androidx.compose.material.icons.outlined.FitnessCenter
-import androidx.compose.material.icons.outlined.History
-import androidx.compose.material.icons.outlined.Timer
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.model.AppTab
-import com.example.ui.screens.HistoryScreen
-import com.example.ui.screens.IntervalScreen
-import com.example.ui.screens.SettingsSheet
-import com.example.ui.screens.StopwatchScreen
-import com.example.ui.theme.DarkOutline
-import com.example.ui.theme.DarkSurface
-import com.example.ui.theme.DarkSurfaceVariant
-import com.example.ui.theme.MyApplicationTheme
-import com.example.ui.theme.TextMuted
-import com.example.ui.theme.TextPrimary
-import com.example.ui.theme.TextSecondary
-import com.example.ui.theme.VoltLime
-import com.example.viewmodel.StopwatchViewModel
+import org.apache.poi.ss.usermodel.*
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import org.apache.poi.xwpf.usermodel.ParagraphAlignment
+import org.apache.poi.xwpf.usermodel.XWPFDocument
+import java.io.File
+import java.io.FileOutputStream
 
 class MainActivity : ComponentActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-
         setContent {
-            val viewModel: StopwatchViewModel = viewModel()
-            val settings by viewModel.settingsState.collectAsStateWithLifecycle()
-
-            // Handle Keep Screen Awake flag
-            LaunchedEffect(settings.keepScreenOn) {
-                if (settings.keepScreenOn) {
-                    window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-                } else {
-                    window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            MaterialTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = Color(0xFFF4F6F9)
+                ) {
+                    ReconciliationScreen(
+                        onGenerate = { month ->
+                            generateReconciliationFiles(month)
+                        }
+                    )
                 }
             }
+        }
+    }
 
-            MyApplicationTheme {
-                MainAppScreen(viewModel = viewModel)
-            }
+    private fun generateReconciliationFiles(monthYear: String) {
+        try {
+            val downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+            if (!downloadDir.exists()) downloadDir.mkdirs()
+
+            // 1. Format A - Detailed Rec Legal Portrait
+            val fileA = File(downloadDir, "Detailed Rec $monthYear Legal Portrait.xlsx")
+            val wbA = XSSFWorkbook()
+            val sheetA = wbA.createSheet("Detailed Rec")
+            val rowA0 = sheetA.createRow(0)
+            rowA0.createCell(0).setCellValue("OFFICE OF THE PRESIDING OFFICER LABOUR COURT HARIPUR")
+            val rowA1 = sheetA.createRow(1)
+            rowA1.createCell(0).setCellValue("GRANT NO. 21037 (030) - HR-4007 | FOR: $monthYear")
+            
+            val headersA = listOf("Object Head", "Budget Estimate 2026-2027", "Revised Budget", "Actual Exp ($monthYear)", "Exp B/F", "Progressive Exp")
+            val hRowA = sheetA.createRow(3)
+            headersA.forEachIndexed { i, h -> hRowA.createCell(i).setCellValue(h) }
+            
+            FileOutputStream(fileA).use { wbA.write(it) }
+            wbA.close()
+
+            // 2. Format B - AG Rec Landscape
+            val fileB = File(downloadDir, "Monthly Expenditure Statement $monthYear Landscape.xlsx")
+            val wbB = XSSFWorkbook()
+            val sheetB = wbB.createSheet("AG Rec")
+            val rowB0 = sheetB.createRow(0)
+            rowB0.createCell(0).setCellValue("MONTHLY EXPENDITURE STATEMENT & RECONCILIATION WITH AG FIGURES")
+            val rowB1 = sheetB.createRow(1)
+            rowB1.createCell(0).setCellValue("OFFICE OF THE PRESIDING OFFICER, LABOUR COURT HARIPUR ($monthYear)")
+            
+            val headersB = listOf("Major / Minor Head", "Budget 2026-27", "Revised Budget", "Dept Figures (Month)", "Dept Progressive", "AG Figures (Month)", "AG Progressive", "Variation")
+            val hRowB = sheetB.createRow(3)
+            headersB.forEachIndexed { i, h -> hRowB.createCell(i).setCellValue(h) }
+
+            FileOutputStream(fileB).use { wbB.write(it) }
+            wbB.close()
+
+            // 3. Format C - RECONCILED Covering Letter Docx
+            val fileC = File(downloadDir, "RECONCILED Covering Letter $monthYear.docx")
+            val doc = XWPFDocument()
+            val titlePara = doc.createParagraph()
+            titlePara.alignment = ParagraphAlignment.CENTER
+            val titleRun = titlePara.createRun()
+            titleRun.isBold = true
+            titleRun.fontSize = 14
+            titleRun.setText("OFFICE OF THE PRESIDING OFFICER, LABOUR COURT HARIPUR\n\n")
+
+            val bodyPara = doc.createParagraph()
+            val bodyRun = bodyPara.createRun()
+            bodyRun.fontSize = 12
+            bodyRun.setText("SUBJECT: MONTHLY RECONCILIATION STATEMENT (EXPENDITURE) FOR $monthYear.\n\n")
+            bodyRun.setText("Enclosed find herewith the monthly reconciliation statement (Expenditure) for the month of $monthYear, duly verified by District Accounts Officer Haripur for further necessary action, please.\n\n\n")
+            bodyRun.setText("District & Sessions Judge / Presiding Officer\nLabour Court Haripur")
+
+            FileOutputStream(fileC).use { doc.write(it) }
+            doc.close()
+
+            Toast.makeText(this, "Success!\nAll 3 files saved in Downloads:\n1. Format A (Detailed Rec)\n2. Format B (AG Rec)\n3. Format C (Covering Letter)", Toast.LENGTH_LONG).show()
+
+        } catch (e: Exception) {
+            Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainAppScreen(
-    viewModel: StopwatchViewModel,
-    modifier: Modifier = Modifier
-) {
-    var selectedTab by remember { mutableStateOf(AppTab.STOPWATCH) }
-    var showSettingsSheet by remember { mutableStateOf(false) }
-    val snackbarHostState = remember { SnackbarHostState() }
+fun ReconciliationScreen(onGenerate: (String) -> Unit) {
+    val months = listOf(
+        "July 2026", "August 2026", "September 2026", "October 2026",
+        "November 2026", "December 2026", "January 2027", "February 2027",
+        "March 2027", "April 2027", "May 2027", "June 2027"
+    )
+    var expanded by remember { mutableStateOf(false) }
+    var selectedMonth by remember { mutableStateOf(months[3]) } // Default October 2026
+    var statusText by remember { mutableStateOf("Ready to generate") }
 
-    val stopwatchState by viewModel.stopwatchState.collectAsStateWithLifecycle()
-    val intervalState by viewModel.intervalState.collectAsStateWithLifecycle()
-    val settingsState by viewModel.settingsState.collectAsStateWithLifecycle()
-    val savedSessions by viewModel.savedSessions.collectAsStateWithLifecycle()
-
-    // BackHandler: return to STOPWATCH if on other tabs
-    if (selectedTab != AppTab.STOPWATCH) {
-        BackHandler {
-            selectedTab = AppTab.STOPWATCH
-        }
-    }
-
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        containerColor = MaterialTheme.colorScheme.background,
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        topBar = {
-            CenterAlignedTopAppBar(
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = DarkSurface,
-                    titleContentColor = TextPrimary
-                ),
-                title = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(28.dp)
-                                .clip(CircleShape)
-                                .background(VoltLime.copy(alpha = 0.18f))
-                                .border(1.dp, VoltLime, CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Timer,
-                                contentDescription = null,
-                                tint = VoltLime,
-                                modifier = Modifier.size(16.dp)
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(
-                                text = "CHRONOS",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Black,
-                                letterSpacing = 2.sp,
-                                color = TextPrimary
-                            )
-                            Text(
-                                text = "PRECISION TIMER",
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.sp,
-                                color = VoltLime,
-                                fontSize = 9.sp
-                            )
-                        }
-                    }
-                },
-                actions = {
-                    IconButton(
-                        onClick = { showSettingsSheet = true },
-                        modifier = Modifier.testTag("open_settings_button")
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "Preferences",
-                            tint = TextSecondary
-                        )
-                    }
-                }
-            )
-        },
-        bottomBar = {
-            NavigationBar(
-                containerColor = DarkSurface,
-                tonalElevation = 6.dp
-            ) {
-                // Tab 1: Stopwatch
-                NavigationBarItem(
-                    selected = selectedTab == AppTab.STOPWATCH,
-                    onClick = { selectedTab = AppTab.STOPWATCH },
-                    icon = {
-                        Icon(
-                            imageVector = if (selectedTab == AppTab.STOPWATCH) Icons.Default.Timer else Icons.Outlined.Timer,
-                            contentDescription = "Stopwatch"
-                        )
-                    },
-                    label = { Text("Stopwatch", fontWeight = FontWeight.SemiBold) },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = Color(0xFF0F1700),
-                        selectedTextColor = VoltLime,
-                        indicatorColor = VoltLime,
-                        unselectedIconColor = TextMuted,
-                        unselectedTextColor = TextMuted
-                    ),
-                    modifier = Modifier.testTag("tab_stopwatch")
-                )
-
-                // Tab 2: Intervals
-                NavigationBarItem(
-                    selected = selectedTab == AppTab.INTERVALS,
-                    onClick = { selectedTab = AppTab.INTERVALS },
-                    icon = {
-                        Icon(
-                            imageVector = if (selectedTab == AppTab.INTERVALS) Icons.Default.FitnessCenter else Icons.Outlined.FitnessCenter,
-                            contentDescription = "Intervals"
-                        )
-                    },
-                    label = { Text("Intervals", fontWeight = FontWeight.SemiBold) },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = Color(0xFF0F1700),
-                        selectedTextColor = VoltLime,
-                        indicatorColor = VoltLime,
-                        unselectedIconColor = TextMuted,
-                        unselectedTextColor = TextMuted
-                    ),
-                    modifier = Modifier.testTag("tab_intervals")
-                )
-
-                // Tab 3: History
-                NavigationBarItem(
-                    selected = selectedTab == AppTab.HISTORY,
-                    onClick = { selectedTab = AppTab.HISTORY },
-                    icon = {
-                        if (savedSessions.isNotEmpty()) {
-                            BadgedBox(
-                                badge = {
-                                    Badge(
-                                        containerColor = VoltLime,
-                                        contentColor = Color(0xFF0F1700)
-                                    ) {
-                                        Text("${savedSessions.size}")
-                                    }
-                                }
-                            ) {
-                                Icon(
-                                    imageVector = if (selectedTab == AppTab.HISTORY) Icons.Default.History else Icons.Outlined.History,
-                                    contentDescription = "History"
-                                )
-                            }
-                        } else {
-                            Icon(
-                                imageVector = if (selectedTab == AppTab.HISTORY) Icons.Default.History else Icons.Outlined.History,
-                                contentDescription = "History"
-                            )
-                        }
-                    },
-                    label = { Text("History", fontWeight = FontWeight.SemiBold) },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = Color(0xFF0F1700),
-                        selectedTextColor = VoltLime,
-                        indicatorColor = VoltLime,
-                        unselectedIconColor = TextMuted,
-                        unselectedTextColor = TextMuted
-                    ),
-                    modifier = Modifier.testTag("tab_history")
-                )
-            }
-        }
-    ) { innerPadding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
         ) {
-            AnimatedContent(
-                targetState = selectedTab,
-                transitionSpec = { fadeIn() togetherWith fadeOut() },
-                label = "tab_transition"
-            ) { tab ->
-                when (tab) {
-                    AppTab.STOPWATCH -> {
-                        StopwatchScreen(
-                            state = stopwatchState,
-                            showAnalogDial = settingsState.showAnalogDial,
-                            onStart = viewModel::startStopwatch,
-                            onPause = viewModel::pauseStopwatch,
-                            onReset = viewModel::resetStopwatch,
-                            onLap = viewModel::recordLap,
-                            onSaveSession = viewModel::saveCurrentSession,
-                            snackbarHostState = snackbarHostState
-                        )
-                    }
-                    AppTab.INTERVALS -> {
-                        IntervalScreen(
-                            state = intervalState,
-                            presets = viewModel.presets,
-                            onSelectPreset = viewModel::selectPreset,
-                            onUpdateCustom = viewModel::updateCustomInterval,
-                            onStart = viewModel::startIntervalTimer,
-                            onPause = viewModel::pauseIntervalTimer,
-                            onReset = viewModel::resetIntervalTimer
-                        )
-                    }
-                    AppTab.HISTORY -> {
-                        HistoryScreen(
-                            sessions = savedSessions,
-                            onDeleteSession = viewModel::deleteSession,
-                            onClearAll = viewModel::clearAllHistory,
-                            snackbarHostState = snackbarHostState
-                        )
+            Column(
+                modifier = Modifier.padding(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Labour Court Haripur",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF1B3B2B),
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = "Monthly Expenditure Reconciliation Generator",
+                    fontSize = 14.sp,
+                    color = Color.Gray,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(top = 4.dp, bottom = 24.dp)
+                )
+
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                    onExpandedChange = { expanded = !expanded },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    OutlinedTextField(
+                        value = selectedMonth,
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Select Reconciliation Month") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                        modifier = Modifier
+                            .menuAnchor()
+                            .fillMaxWidth()
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        months.forEach { month ->
+                            DropdownMenuItem(
+                                text = { Text(month) },
+                                onClick = {
+                                    selectedMonth = month
+                                    expanded = false
+                                }
+                            )
+                        }
                     }
                 }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Button(
+                    onClick = {
+                        statusText = "Generated for $selectedMonth!"
+                        onGenerate(selectedMonth)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1B5E20))
+                ) {
+                    Text(
+                        text = "Generate All 3 Formats",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color.White
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = statusText,
+                    fontSize = 13.sp,
+                    color = Color(0xFF2E7D32),
+                    fontWeight = FontWeight.Medium
+                )
             }
         }
-    }
-
-    // Settings Modal Bottom Sheet
-    if (showSettingsSheet) {
-        SettingsSheet(
-            settings = settingsState,
-            onToggleHaptic = viewModel::toggleHaptic,
-            onToggleSound = viewModel::toggleSound,
-            onToggleKeepScreenOn = viewModel::toggleKeepScreenOn,
-            onToggleAnalogDial = viewModel::toggleAnalogDial,
-            onDismiss = { showSettingsSheet = false }
-        )
     }
 }
