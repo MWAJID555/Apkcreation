@@ -1,63 +1,42 @@
-<?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-
-    <!-- Top Crown / Stem -->
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M51,24 h6 v6 h-6 z" />
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M48,22 h12 v3 h-12 z" />
-
-    <!-- Top Right Lap Pusher Button -->
-    <path
-        android:fillColor="#CCFF00"
-        android:pathData="M73.5,31.5 L77.5,27.5 L80,30 L76,34 Z" />
-
-    <!-- Top Left Mode Pusher Button -->
-    <path
-        android:fillColor="#94A3B8"
-        android:pathData="M34.5,31.5 L32,34 L28,30 L30.5,27.5 Z" />
-
-    <!-- Stopwatch Outer Ring -->
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M54,32 C40.75,32 30,42.75 30,56 C30,69.25 40.75,80 54,80 C67.25,80 78,69.25 78,56 C78,42.75 67.25,32 54,32 Z M54,75 C43.51,75 35,66.49 35,56 C35,45.51 43.51,37 54,37 C64.49,37 73,45.51 73,56 C73,66.49 64.49,75 54,75 Z" />
-
-    <!-- Dial Tick Marks -->
-    <path
-        android:fillColor="#CCFF00"
-        android:pathData="M53,38 h2 v4 h-2 z" />
-    <path
-        android:fillColor="#64748B"
-        android:pathData="M53,70 h2 v4 h-2 z" />
-    <path
-        android:fillColor="#64748B"
-        android:pathData="M37,55 h4 v2 h-4 z" />
-    <path
-        android:fillColor="#64748B"
-        android:pathData="M67,55 h4 v2 h-4 z" />
-
-    <!-- Inner Sub-dial Ring -->
-    <path
-        android:fillColor="#334155"
-        android:pathData="M54,44 C50.69,44 48,46.69 48,50 C48,53.31 50.69,56 54,56 C57.31,56 60,53.31 60,50 C60,46.69 57.31,44 54,44 Z M54,54.5 C51.51,54.5 49.5,52.49 49.5,50 C49.5,47.51 51.51,45.5 54,45.5 C56.49,45.5 58.5,47.51 58.5,50 C58.5,52.49 56.49,54.5 54,54.5 Z" />
-
-    <!-- Stopwatch Hand (Dynamic Angle pointing to ~ 2 o'clock) -->
-    <path
-        android:fillColor="#CCFF00"
-        android:pathData="M53.2,56.5 L64.8,45.2 C65.2,44.8 65.8,45.4 65.4,45.8 L54.8,57.4 Z" />
-
-    <!-- Center Pivot Pin -->
-    <path
-        android:fillColor="#CCFF00"
-        android:pathData="M54,53 C52.34,53 51,54.34 51,56 C51,57.66 52.34,59 54,59 C55.66,59 57,57.66 57,56 C57,54.34 55.66,53 54,53 Z" />
-    <path
-        android:fillColor="#0A0F1D"
-        android:pathData="M54,54.8 C53.34,54.8 52.8,55.34 52.8,56 C52.8,56.66 53.34,57.2 54,57.2 C54.66,57.2 55.2,56.66 55.2,56 C55.2,55.34 54.66,54.8 54,54.8 Z" />
-
+    <group
+        android:scaleX="0.6"
+        android:scaleY="0.6"
+        android:translateX="21.6"
+        android:translateY="21.6">
+        <!-- Scale of Justice / Court Emblem -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M54,14 L50,22 L58,22 Z" />
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M52,22 L56,22 L56,78 L52,78 Z" />
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M24,28 L84,28 L84,32 L24,32 Z" />
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M40,80 L68,80 L68,86 L40,86 Z" />
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M32,86 L76,86 L76,92 L32,92 Z" />
+        <!-- Left Pan -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M24,32 L14,56 L34,56 Z" />
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M12,56 C12,68 36,68 36,56 Z" />
+        <!-- Right Pan -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M84,32 L74,56 L94,56 Z" />
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M72,56 C72,68 96,68 96,56 Z" />
+    </group>
 </vector>
