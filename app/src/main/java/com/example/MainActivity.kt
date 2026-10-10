@@ -331,8 +331,9 @@ class MainActivity : ComponentActivity() {
 
             val certStyle = wbB.createCellStyle().apply { setFont(fontBCert); wrapText = true }
             val cRow1 = sheetB.createRow(28)
-            cRow1.createCell(0).apply { setCellValue("CERTIFICATE:\n\“Figures mentioned in the statement are compared with available posts and sanctioned strength of this office and found correct in all respects.\”"); cellStyle = certStyle }
-            cRow1.createCell(4).apply { setCellValue("CERTIFICATE:\n\“It is certified that payroll register & expenditure figures provided by District Accounts Office Haripur have thoroughly been examined & verified; data of all employees are correct.\”"); cellStyle = certStyle }
+           cRow1.createCell(0).apply { setCellValue("CERTIFICATE:\n\"Figures mentioned in the statement are compared with available posts and sanctioned strength of this office and found correct in all respects.\""); cellStyle = certStyle }
+            cRow1.createCell(4).apply { setCellValue("CERTIFICATE:\n\"It is certified that payroll register & expenditure figures provided by District Accounts Office Haripur have thoroughly been examined & verified; data of all employees are correct.\""); cellStyle = certStyle }
+            
             sheetB.addMergedRegion(CellRangeAddress(28, 30, 0, 3))
             sheetB.addMergedRegion(CellRangeAddress(28, 30, 4, 7))
 
